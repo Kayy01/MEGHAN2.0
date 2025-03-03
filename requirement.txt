@@ -1,0 +1,16 @@
+﻿streamlit
+langchain
+openai
+azure-search-documents
+python-dotenv
+pandas
+requests
+PyYAML
+tiktoken
+langchain-openai
+python-dotenv
+PyPDF2
+python-docx
+pandas
+azure-search-documents
+azure-core
