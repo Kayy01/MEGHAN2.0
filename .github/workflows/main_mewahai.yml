@@ -56,6 +56,9 @@ jobs:
       contents: read #This is required for actions/checkout
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
@@ -64,7 +67,6 @@ jobs:
       - name: Unzip artifact for deployment
         run: unzip release.zip
 
-      
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -72,10 +74,15 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_E0BA1D774DB5422294B96ED7F6D14AF6 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_4A5443D2ED5645E599F4AD35F9112474 }}
 
-      - name: 'Deploy to Azure Web App'
+      - name: Set Azure App Service Environment Variable
+        run: |
+          az webapp config appsettings set --name MewahAI --resource-group kareena-rg --settings AZURE_SECRETS='${{ secrets.AZURE_SECRETS }}'
+
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
           app-name: 'MewahAI'
           slot-name: 'Production'
+
           
