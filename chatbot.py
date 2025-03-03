@@ -11,6 +11,10 @@ from azure.search.documents.indexes import SearchIndexClient
 from azure.search.documents.indexes.models import SearchIndex, SimpleField, SearchFieldDataType
 from azure.core.credentials import AzureKeyCredential
 
+if __name__ == "__main__":
+    import os
+    os.system("streamlit run chatbot.py --server.port 8000 --server.address 0.0.0.0")
+
 # Fetch GitHub secret (expected to be a JSON string)
 AZURE_SECRETS = os.getenv("AZURE_SECRETS")
 
