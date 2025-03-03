@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/768d23be-3206-48f4-921d-b86dc8c66a0a/resourceGroups/kareena-rg/providers/Microsoft.Web/sites/MewahAI",
+    "appService.deploySubpath": "."
+}
