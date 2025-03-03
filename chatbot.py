@@ -13,16 +13,23 @@ from azure.search.documents.indexes import SearchIndexClient
 from azure.search.documents.indexes.models import SearchIndex, SimpleField, SearchFieldDataType
 from azure.core.credentials import AzureKeyCredential
 
-OPENAI_DEPLOYMENT_NAME = os.getenv("OPENAI_DEPLOYMENT_NAME")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
-AZURE_SEARCH_SERVICE = os.getenv("AZURE_SEARCH_SERVICE")
-AZURE_SEARCH_KEY = os.getenv("AZURE_SEARCH_KEY")
-AZURE_SEARCH_INDEX = os.getenv("AZURE_SEARCH_INDEX")
+dotenv.load_dotenv(os.path.expanduser("~/.env"))
+                   
+# Function to fetch environment variables dynamically
+def get_secret(key, default=None):
+    return os.getenv(key, default)
+
+# Example usage 
+OPENAI_DEPLOYMENT_NAME = get_secret("OPENAI_DEPLOYMENT_NAME")
+OPENAI_API_KEY = get_secret("OPENAI_API_KEY")
+AZURE_OPENAI_ENDPOINT = get_secret("AZURE_OPENAI_ENDPOINT")
+AZURE_SEARCH_SERVICE = get_secret("AZURE_SEARCH_SERVICE")
+AZURE_SEARCH_KEY = get_secret("AZURE_SEARCH_KEY")
+AZURE_SEARCH_INDEX = get_secret("AZURE_SEARCH_INDEX")
 
 # Check if required secrets exist
 required_secrets = ["OPENAI_DEPLOYMENT_NAME", "OPENAI_API_KEY", "AZURE_OPENAI_ENDPOINT"]
-missing_secrets = [key for key in required_secrets if not os.getenv(key)]
+missing_secrets = [key for key in required_secrets if not get_secret(key)]
 
 if missing_secrets:
     st.error(f"❌ Missing required secrets: {', '.join(missing_secrets)}")
