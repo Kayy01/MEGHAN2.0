@@ -75,8 +75,7 @@ jobs:
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_4A5443D2ED5645E599F4AD35F9112474 }}
 
       - name: Set Azure App Service Environment Variable
-        run: |
-          az webapp config appsettings set --name MewahAI --resource-group kareena-rg --settings AZURE_SECRETS='${{ secrets.AZURE_SECRETS }}'
+        run: echo "AZURE_SECRETS=${{ secrets.AZURE_SECRETS }}" >> $GITHUB_ENV
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
