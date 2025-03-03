@@ -11,6 +11,11 @@ from azure.search.documents.indexes import SearchIndexClient
 from azure.search.documents.indexes.models import SearchIndex, SimpleField, SearchFieldDataType
 from azure.search.documents import SearchClient
 from azure.core.credentials import AzureKeyCredential
+import os
+import json
+import streamlit as st
+from azure.search.documents import SearchClient
+from azure.core.credentials import AzureKeyCredential
 
 # Fetch GitHub secret (expected to be a JSON string)
 AZURE_SECRETS = os.getenv("AZURE_SECRETS")
