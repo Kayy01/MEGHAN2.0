@@ -4,41 +4,26 @@ from dotenv import load_dotenv
 import os
 import PyPDF2
 import docx
-import json
 import pandas as pd
 from azure.search.documents import SearchClient
 from azure.search.documents.indexes import SearchIndexClient
 from azure.search.documents.indexes.models import SearchIndex, SimpleField, SearchFieldDataType
-from azure.search.documents import SearchClient
 from azure.core.credentials import AzureKeyCredential
-import os
-import json
-import streamlit as st
-from azure.search.documents import SearchClient
-from azure.core.credentials import AzureKeyCredential
+from dotenv import load_dotenv
 
-# Fetch GitHub secret (expected to be a JSON string)
-AZURE_SECRETS = os.getenv("AZURE_SECRETS")
+load_dotenv(dotenv_path="index.env", override=True)
 
-if AZURE_SECRETS:
-    try:
-        secrets = json.loads(AZURE_SECRETS)  # Parse the JSON string
-        OPENAI_DEPLOYMENT_NAME = secrets.get("OPENAI_DEPLOYMENT_NAME")
-        OPENAI_API_KEY = secrets.get("OPENAI_API_KEY")
-        AZURE_OPENAI_ENDPOINT = secrets.get("AZURE_OPENAI_ENDPOINT")
-        AZURE_SEARCH_SERVICE = secrets.get("AZURE_SEARCH_SERVICE")  
-        AZURE_SEARCH_KEY = secrets.get("AZURE_SEARCH_KEY")
-        AZURE_SEARCH_INDEX = secrets.get("AZURE_SEARCH_INDEX")
-    except json.JSONDecodeError:
-        st.error("❌ Failed to decode AZURE_SECRETS. Ensure it's a valid JSON.")
-        st.stop()
-else:
-    st.error("❌ Missing AZURE_SECRETS environment variable.")
-    st.stop()
+# Fetch environment variables
+OPENAI_DEPLOYMENT_NAME = os.getenv("OPENAI_DEPLOYMENT_NAME")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
+AZURE_SEARCH_SERVICE = os.getenv("AZURE_SEARCH_SERVICE")  
+AZURE_SEARCH_KEY = os.getenv("AZURE_SEARCH_KEY")
+AZURE_SEARCH_INDEX = os.getenv("AZURE_SEARCH_INDEX")
 
 # Validate required values
 if not OPENAI_API_KEY or not AZURE_OPENAI_ENDPOINT or not AZURE_SEARCH_SERVICE or not AZURE_SEARCH_KEY or not AZURE_SEARCH_INDEX:
-    st.error("❌ Missing API keys or Azure Search details. Check your GitHub Secrets.")
+    st.error("❌ Missing API keys or Azure Search details. Check your .env file.")
     st.stop()
 
 AZURE_SEARCH_ENDPOINT = f"https://{AZURE_SEARCH_SERVICE}.search.windows.net"
