@@ -11,32 +11,24 @@ from azure.search.documents.indexes import SearchIndexClient
 from azure.search.documents.indexes.models import SearchIndex, SimpleField, SearchFieldDataType
 from azure.core.credentials import AzureKeyCredential
 
-if __name__ == "__main__":
-    import os
-    os.system("streamlit run chatbot.py --server.port 8000 --server.address localhost")
+# Function to fetch environment variables dynamically
+def get_secret(key, default=None):
+    return os.getenv(key, default)
 
-# Fetch GitHub secret (expected to be a JSON string)
-AZURE_SECRETS = os.getenv("AZURE_SECRETS")
+# Example usage (you don’t need to predefine keys)
+OPENAI_DEPLOYMENT_NAME = get_secret("OPENAI_DEPLOYMENT_NAME")
+OPENAI_API_KEY = get_secret("OPENAI_API_KEY")
+AZURE_OPENAI_ENDPOINT = get_secret("AZURE_OPENAI_ENDPOINT")
+AZURE_SEARCH_SERVICE = get_secret("AZURE_SEARCH_SERVICE")
+AZURE_SEARCH_KEY = get_secret("AZURE_SEARCH_KEY")
+AZURE_SEARCH_INDEX = get_secret("AZURE_SEARCH_INDEX")
 
-if AZURE_SECRETS:
-    try:
-        secrets = json.loads(AZURE_SECRETS)  # Parse the JSON string
-        OPENAI_DEPLOYMENT_NAME = secrets.get("OPENAI_DEPLOYMENT_NAME")
-        OPENAI_API_KEY = secrets.get("OPENAI_API_KEY")
-        AZURE_OPENAI_ENDPOINT = secrets.get("AZURE_OPENAI_ENDPOINT")
-        AZURE_SEARCH_SERVICE = secrets.get("AZURE_SEARCH_SERVICE")  
-        AZURE_SEARCH_KEY = secrets.get("AZURE_SEARCH_KEY")
-        AZURE_SEARCH_INDEX = secrets.get("AZURE_SEARCH_INDEX")
-    except json.JSONDecodeError:
-        st.error("❌ Failed to decode AZURE_SECRETS. Ensure it's a valid JSON.")
-        st.stop()
-else:
-    st.error("❌ Missing AZURE_SECRETS environment variable.")
-    st.stop()
+# Check if required secrets exist
+required_secrets = ["OPENAI_DEPLOYMENT_NAME", "OPENAI_API_KEY", "AZURE_OPENAI_ENDPOINT"]
+missing_secrets = [key for key in required_secrets if not get_secret(key)]
 
-# Validate required values
-if not OPENAI_API_KEY or not AZURE_OPENAI_ENDPOINT or not AZURE_SEARCH_SERVICE or not AZURE_SEARCH_KEY or not AZURE_SEARCH_INDEX:
-    st.error("❌ Missing API keys or Azure Search details. Check your GitHub Secrets.")
+if missing_secrets:
+    st.error(f"❌ Missing required secrets: {', '.join(missing_secrets)}")
     st.stop()
 
 AZURE_SEARCH_ENDPOINT = f"https://{AZURE_SEARCH_SERVICE}.search.windows.net"
