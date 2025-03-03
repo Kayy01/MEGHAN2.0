@@ -6,16 +6,20 @@ import PyPDF2
 import docx
 import pandas as pd
 import json
+import dotenv
+import os
 from azure.search.documents import SearchClient
 from azure.search.documents.indexes import SearchIndexClient
 from azure.search.documents.indexes.models import SearchIndex, SimpleField, SearchFieldDataType
 from azure.core.credentials import AzureKeyCredential
 
+dotenv.load_dotenv(os.path.expanduser("~/.env"))
+                   
 # Function to fetch environment variables dynamically
 def get_secret(key, default=None):
     return os.getenv(key, default)
 
-# Example usage (you don’t need to predefine keys)
+# Example usage 
 OPENAI_DEPLOYMENT_NAME = get_secret("OPENAI_DEPLOYMENT_NAME")
 OPENAI_API_KEY = get_secret("OPENAI_API_KEY")
 AZURE_OPENAI_ENDPOINT = get_secret("AZURE_OPENAI_ENDPOINT")
