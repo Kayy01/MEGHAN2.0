@@ -13,32 +13,27 @@ from azure.core.credentials import AzureKeyCredential
 
 import os
 
-# Fetch secrets once and store them in a dictionary
-secrets = {
-    "OPENAI_DEPLOYMENT_NAME": os.getenv("OPENAI_DEPLOYMENT_NAME"),
-    "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY"),
-    "AZURE_OPENAI_ENDPOINT": os.getenv("AZURE_OPENAI_ENDPOINT"),
-    "AZURE_SEARCH_SERVICE": os.getenv("AZURE_SEARCH_SERVICE"),
-    "AZURE_SEARCH_KEY": os.getenv("AZURE_SEARCH_KEY"),
-    "AZURE_SEARCH_INDEX": os.getenv("AZURE_SEARCH_INDEX"),
-    "OPENAI_API_VERSION": os.getenv("OPENAI_API_VERSION"),
-}
+# Fetch GitHub secret (expected to be a JSON string)
+AZURE_SECRETS = os.getenv("AZURE_SECRETS")
 
-# Assign individual variables (optional, if needed elsewhere)
-OPENAI_DEPLOYMENT_NAME = secrets["OPENAI_DEPLOYMENT_NAME"]
-OPENAI_API_KEY = secrets["OPENAI_API_KEY"]
-AZURE_SEARCH_SERVICE = secrets["AZURE_SEARCH_SERVICE"]
-AZURE_SEARCH_KEY = secrets["AZURE_SEARCH_KEY"]
-AZURE_SEARCH_INDEX = secrets["AZURE_SEARCH_INDEX"]
-OPENAI_API_VERSION = secrets["OPENAI_API_VERSION"]
-AZURE_OPENAI_ENDPOINT = secrets["AZURE_OPENAI_ENDPOINT"]
-
-# Print which secrets are missing (do NOT print actual values for security)
-missing_secrets = [key for key, value in secrets.items() if not value]
-if missing_secrets:
-    print(f"❌ Missing secrets: {', '.join(missing_secrets)}")
+if AZURE_SECRETS:
+    try:
+        secrets = json.loads(AZURE_SECRETS)  # Parse the JSON string
+        OPENAI_DEPLOYMENT_NAME = secrets.get("OPENAI_DEPLOYMENT_NAME")
+        OPENAI_API_KEY = secrets.get("OPENAI_API_KEY")
+        AZURE_OPENAI_ENDPOINT = secrets.get("AZURE_OPENAI_ENDPOINT")
+        AZURE_SEARCH_SERVICE = secrets.get("AZURE_SEARCH_SERVICE")  
+        AZURE_SEARCH_KEY = secrets.get("AZURE_SEARCH_KEY")
+        AZURE_SEARCH_INDEX = secrets.get("AZURE_SEARCH_INDEX")
+        OPENAI_API_VERSION  = secrets.get("OPENAI_API_VERSION")
+    except json.JSONDecodeError:
+        print("❌ Failed to decode AZURE_SECRETS. Ensure it's a valid JSON.")
 else:
-    print("✅ All secrets are successfully loaded.")
+    print("❌ Missing AZURE_SECRETS environment variable.")
+
+# Validate required values
+if not OPENAI_API_KEY or not AZURE_OPENAI_ENDPOINT or not AZURE_SEARCH_SERVICE or not AZURE_SEARCH_KEY or not AZURE_SEARCH_INDEX:
+    print("❌ Missing API keys or Azure Search details. Check your GitHub Secrets.")
 
 # Construct Azure Search Endpoint
 if AZURE_SEARCH_SERVICE:
