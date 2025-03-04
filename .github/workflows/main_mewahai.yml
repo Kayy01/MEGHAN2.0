@@ -14,10 +14,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read # Required for actions/checkout
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Python version
         uses: actions/setup-python@v5
@@ -28,16 +29,24 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
-      
+
       - name: Install dependencies
         run: pip install -r requirements.txt
-        
-      # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
+
+      - name: Debug environment variables
+        run: echo "AZURE_SECRETS=${{ secrets.AZURE_SECRETS }}" | sed 's/./& /g'  # Print AZURE_SECRETS as spaced-out characters to avoid leaking secrets
+
+      - name: Set AZURE_SECRETS environment variable
+        run: |
+            echo "AZURE_SECRETS<<EOF" >> $GITHUB_ENV
+            echo "${{ secrets.AZURE_SECRETS }}" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+
 
       - name: Zip artifact for deployment
         run: zip release.zip ./* -r
 
-      - name: Upload artifact for deployment jobs
+      - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
           name: python-app
@@ -52,8 +61,8 @@ jobs:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write # Required for requesting the JWT
+      contents: read  # Required for actions/checkout
 
     steps:
       - name: Download artifact from build job
@@ -64,7 +73,6 @@ jobs:
       - name: Unzip artifact for deployment
         run: unzip release.zip
 
-      
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -72,14 +80,12 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_E0BA1D774DB5422294B96ED7F6D14AF6 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_4A5443D2ED5645E599F4AD35F9112474 }}
 
-      - name: 'Deploy to Azure Web App'
+      - name: Check Azure Login
+        run: az account show  # Debugging step to verify Azure login
+
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
           app-name: 'MewahAI'
           slot-name: 'Production'
-
-
-
-
-          
