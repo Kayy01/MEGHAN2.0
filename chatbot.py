@@ -129,8 +129,8 @@ def generate_response(query, file_text=None):
     chat = AzureChatOpenAI(
         model_name=OPENAI_DEPLOYMENT_NAME,
         api_key=OPENAI_API_KEY,
-        azure_endpoint=AZURE_OPENAI_ENDPOINT
-        api_version=OPENAI_API_VERSION
+        azure_endpoint=AZURE_OPENAI_ENDPOINT,
+        api_version=OPENAI_API_VERSION,
     )
     
     answer = chat.predict(prompt)
