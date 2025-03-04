@@ -32,6 +32,16 @@ else:
     st.error("❌ Missing AZURE_SECRETS environment variable.")
     st.stop()
 
+AZURE_SECRETS = os.getenv("AZURE_SECRETS")
+
+if AZURE_SECRETS:
+    try:
+        secrets = json.loads(AZURE_SECRETS)
+        print("Deployment Name:", secrets.get("OPENAI_DEPLOYMENT_NAME"))
+    except json.JSONDecodeError:
+        print("Invalid AZURE_SECRETS JSON format.")
+else:
+    print("AZURE_SECRETS is not set.")
 # Validate required values
 if not OPENAI_API_KEY or not AZURE_OPENAI_ENDPOINT or not AZURE_SEARCH_SERVICE or not AZURE_SEARCH_KEY or not AZURE_SEARCH_INDEX:
     st.error("❌ Missing API keys or Azure Search details. Check your GitHub Secrets.")
