@@ -11,54 +11,25 @@ from azure.search.documents.indexes import SearchIndexClient
 from azure.search.documents.indexes.models import SearchIndex, SimpleField, SearchFieldDataType
 from azure.core.credentials import AzureKeyCredential
 
+# Print the variable for debugging
+print("AZURE_SECRETS:", os.getenv("AZURE_SECRETS"))
+
 # Fetch GitHub secret (expected to be a JSON string)
 AZURE_SECRETS = os.getenv("AZURE_SECRETS")
 
 if AZURE_SECRETS:
     try:
         secrets = json.loads(AZURE_SECRETS)  # Parse the JSON string
-        OPENAI_DEPLOYMENT_NAME = secrets.get("OPENAI_DEPLOYMENT_NAME")
-        OPENAI_API_KEY = secrets.get("OPENAI_API_KEY")
-        AZURE_OPENAI_ENDPOINT = secrets.get("AZURE_OPENAI_ENDPOINT")
-        AZURE_SEARCH_SERVICE = secrets.get("AZURE_SEARCH_SERVICE")  
-        AZURE_SEARCH_KEY = secrets.get("AZURE_SEARCH_KEY")
-        AZURE_SEARCH_INDEX = secrets.get("AZURE_SEARCH_INDEX")
-        OPENAI_API_VERSION  = secrets.get("OPENAI_API_VERSION")
+        print("✅ AZURE_SECRETS successfully loaded!")
+        print("Deployment Name:", secrets.get("OPENAI_DEPLOYMENT_NAME"))
     except json.JSONDecodeError:
+        print("❌ Invalid AZURE_SECRETS JSON format.")
         st.error("❌ Failed to decode AZURE_SECRETS. Ensure it's a valid JSON.")
         st.stop()
 else:
-    print(os.getenv("AZURE_SECRETS"))
+    print("❌ AZURE_SECRETS is not set.")
     st.error("❌ Missing AZURE_SECRETS environment variable.")
     st.stop()
-
-AZURE_SECRETS = os.getenv("AZURE_SECRETS")
-
-if AZURE_SECRETS:
-    try:
-        secrets = json.loads(AZURE_SECRETS)
-        print("Deployment Name:", secrets.get("OPENAI_DEPLOYMENT_NAME"))
-    except json.JSONDecodeError:
-        print("Invalid AZURE_SECRETS JSON format.")
-else:
-    print("AZURE_SECRETS is not set.")
-# Validate required values
-if not OPENAI_API_KEY or not AZURE_OPENAI_ENDPOINT or not AZURE_SEARCH_SERVICE or not AZURE_SEARCH_KEY or not AZURE_SEARCH_INDEX:
-    st.error("❌ Missing API keys or Azure Search details. Check your GitHub Secrets.")
-    st.stop()
-
-AZURE_SEARCH_ENDPOINT = f"https://{AZURE_SEARCH_SERVICE}.search.windows.net"
-
-try:
-    search_client = SearchClient(
-        endpoint=AZURE_SEARCH_ENDPOINT,  
-        index_name=AZURE_SEARCH_INDEX,
-        credential=AzureKeyCredential(AZURE_SEARCH_KEY)
-    )
-except Exception as e:
-    st.error(f"❌ Failed to connect to Azure AI Search: {e}")
-    st.stop()
-
 
 # ✅ Search function
 def search_documents(query, top_k=50):
