@@ -11,24 +11,37 @@ from azure.search.documents.indexes import SearchIndexClient
 from azure.search.documents.indexes.models import SearchIndex, SimpleField, SearchFieldDataType
 from azure.core.credentials import AzureKeyCredential
 
-# Print the variable for debugging
-print("AZURE_SECRETS:", os.getenv("AZURE_SECRETS"))
-
-# Fetch GitHub secret (expected to be a JSON string)
+# Check if environment variable is set
 AZURE_SECRETS = os.getenv("AZURE_SECRETS")
+print("AZURE_SECRETS:", AZURE_SECRETS)  # Debugging
 
-if AZURE_SECRETS:
-    try:
-        secrets = json.loads(AZURE_SECRETS)  # Parse the JSON string
-        print("✅ AZURE_SECRETS successfully loaded!")
-        print("Deployment Name:", secrets.get("OPENAI_DEPLOYMENT_NAME"))
-    except json.JSONDecodeError:
-        print("❌ Invalid AZURE_SECRETS JSON format.")
-        st.error("❌ Failed to decode AZURE_SECRETS. Ensure it's a valid JSON.")
+if not AZURE_SECRETS:
+    st.error("❌ AZURE_SECRETS environment variable is missing.")
+    st.stop()
+
+try:
+    # Parse JSON
+    secrets = json.loads(AZURE_SECRETS)
+    print("✅ AZURE_SECRETS successfully loaded!")
+
+    # Extract values from JSON
+    OPENAI_DEPLOYMENT_NAME = secrets.get("OPENAI_DEPLOYMENT_NAME")
+    OPENAI_API_KEY = secrets.get("OPENAI_API_KEY")
+    AZURE_OPENAI_ENDPOINT = secrets.get("AZURE_OPENAI_ENDPOINT")
+    AZURE_SEARCH_SERVICE = secrets.get("AZURE_SEARCH_SERVICE")  
+    AZURE_SEARCH_KEY = secrets.get("AZURE_SEARCH_KEY")
+    AZURE_SEARCH_INDEX = secrets.get("AZURE_SEARCH_INDEX")
+    OPENAI_API_VERSION  = secrets.get("OPENAI_API_VERSION")
+
+    print(f"OPENAI_DEPLOYMENT_NAME: {OPENAI_DEPLOYMENT_NAME}")  # Debugging
+
+    # Check if all values are set
+    if not all([OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, AZURE_SEARCH_SERVICE, AZURE_SEARCH_KEY, AZURE_SEARCH_INDEX]):
+        st.error("❌ Missing API keys or Azure Search details. Check your GitHub Secrets.")
         st.stop()
-else:
-    print("❌ AZURE_SECRETS is not set.")
-    st.error("❌ Missing AZURE_SECRETS environment variable.")
+
+except json.JSONDecodeError:
+    st.error("❌ Failed to decode AZURE_SECRETS. Ensure it's a valid JSON.")
     st.stop()
 
 # ✅ Search function
