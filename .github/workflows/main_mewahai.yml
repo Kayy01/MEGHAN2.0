@@ -38,8 +38,13 @@ jobs:
 
       - name: Set AZURE_SECRETS environment variable
         run: |
-            echo "AZURE_SECRETS<<EOF" >> $GITHUB_ENV
-            echo "${{ secrets.AZURE_SECRETS }}" >> $GITHUB_ENV
+            echo "OPENAI_DEPLOYMENT_NAME=${{ secrets.OPENAI_DEPLOYMENT_NAME }}"<<EOF >> $GITHUB_ENV
+            echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}"<<EOF >> $GITHUB_ENV
+            echo "AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }}"<<EOF >> $GITHUB_ENV
+            echo "AZURE_SEARCH_SERVICE=${{ secrets.AZURE_SEARCH_SERVICE }}"<<EOF >> $GITHUB_ENV
+            echo "AZURE_SEARCH_KEY=${{ secrets.AZURE_SEARCH_KEY }}"<<EOF >> $GITHUB_ENV
+            echo "AZURE_SEARCH_INDEX=${{ secrets.AZURE_SEARCH_INDEX }}"<<EOF >>$GITHUB_ENV
+            echo "OPENAI_API_VERSION=${{ secrets.OPENAI_API_VERSION }}"<<EOF >> $GITHUB_ENV
             echo "EOF" >> $GITHUB_ENV
 
 
