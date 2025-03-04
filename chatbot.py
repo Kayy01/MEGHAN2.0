@@ -11,16 +11,9 @@ from azure.search.documents.indexes import SearchIndexClient
 from azure.search.documents.indexes.models import SearchIndex, SimpleField, SearchFieldDataType
 from azure.core.credentials import AzureKeyCredential
 
-# Fetch individual secrets from environment variables
-OPENAI_DEPLOYMENT_NAME = os.getenv("OPENAI_DEPLOYMENT_NAME")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
-AZURE_SEARCH_SERVICE = os.getenv("AZURE_SEARCH_SERVICE")  
-AZURE_SEARCH_KEY = os.getenv("AZURE_SEARCH_KEY")
-AZURE_SEARCH_INDEX = os.getenv("AZURE_SEARCH_INDEX")
-OPENAI_API_VERSION  = os.getenv("OPENAI_API_VERSION")
+import os
 
-# Fetch individual secrets
+# Fetch secrets once and store them in a dictionary
 secrets = {
     "OPENAI_DEPLOYMENT_NAME": os.getenv("OPENAI_DEPLOYMENT_NAME"),
     "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY"),
@@ -31,13 +24,27 @@ secrets = {
     "OPENAI_API_VERSION": os.getenv("OPENAI_API_VERSION"),
 }
 
+# Assign individual variables (optional, if needed elsewhere)
+OPENAI_DEPLOYMENT_NAME = secrets["OPENAI_DEPLOYMENT_NAME"]
+OPENAI_API_KEY = secrets["OPENAI_API_KEY"]
+AZURE_SEARCH_SERVICE = secrets["AZURE_SEARCH_SERVICE"]
+AZURE_SEARCH_KEY = secrets["AZURE_SEARCH_KEY"]
+AZURE_SEARCH_INDEX = secrets["AZURE_SEARCH_INDEX"]
+OPENAI_API_VERSION = secrets["OPENAI_API_VERSION"]
+AZURE_OPENAI_ENDPOINT = secrets["AZURE_OPENAI_ENDPOINT"]
+
 # Print which secrets are missing (do NOT print actual values for security)
-missing_secrets = [key for key, value in secrets.items() if value is None]
+missing_secrets = [key for key, value in secrets.items() if not value]
 if missing_secrets:
     print(f"❌ Missing secrets: {', '.join(missing_secrets)}")
 else:
     print("✅ All secrets are successfully loaded.")
 
+# Construct Azure Search Endpoint
+if AZURE_SEARCH_SERVICE:
+    AZURE_SEARCH_ENDPOINT = f"https://{AZURE_SEARCH_SERVICE}.search.windows.net"
+else:
+    print("❌ Missing AZURE_SEARCH_SERVICE, cannot construct endpoint.")
 AZURE_SEARCH_ENDPOINT = f"https://{AZURE_SEARCH_SERVICE}.search.windows.net"
 
 try:
@@ -134,7 +141,7 @@ def generate_response(query, file_text=None):
         api_version=OPENAI_API_VERSION,
     )
     
-    answer = chat.predict(prompt)
+    answer = chat.invoke(prompt)
     return answer, references
 
 # Streamlit UI
