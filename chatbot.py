@@ -27,6 +27,7 @@ if AZURE_SECRETS:
         st.error("❌ Failed to decode AZURE_SECRETS. Ensure it's a valid JSON.")
         st.stop()
 else:
+    print(os.getenv("AZURE_SECRETS"))
     st.error("❌ Missing AZURE_SECRETS environment variable.")
     st.stop()
 
