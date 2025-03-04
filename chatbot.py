@@ -24,6 +24,7 @@ print("✅ Environment variables successfully loaded!")  # Debugging
 
 # Debugging - Print one variable to check if it's loaded
 print(f"OPENAI_DEPLOYMENT_NAME: {OPENAI_DEPLOYMENT_NAME}")
+print(f"OPENAI_API_KEY: {OPENAI_API_KEY}")
 
 # Check if all required values are set
 if not all([OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, AZURE_SEARCH_SERVICE, AZURE_SEARCH_KEY, AZURE_SEARCH_INDEX]):
