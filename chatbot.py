@@ -31,10 +31,12 @@ secrets = {
     "OPENAI_API_VERSION": os.getenv("OPENAI_API_VERSION"),
 }
 
-# Validate required values
-if not OPENAI_API_KEY or not AZURE_OPENAI_ENDPOINT or not AZURE_SEARCH_SERVICE or not AZURE_SEARCH_KEY or not AZURE_SEARCH_INDEX:
-    st.error("❌ Missing API keys or Azure Search details. Check your GitHub Secrets.")
-    st.stop()
+# Print which secrets are missing (do NOT print actual values for security)
+missing_secrets = [key for key, value in secrets.items() if value is None]
+if missing_secrets:
+    print(f"❌ Missing secrets: {', '.join(missing_secrets)}")
+else:
+    print("✅ All secrets are successfully loaded.")
 
 AZURE_SEARCH_ENDPOINT = f"https://{AZURE_SEARCH_SERVICE}.search.windows.net"
 
