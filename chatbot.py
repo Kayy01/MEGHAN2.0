@@ -23,6 +23,7 @@ if AZURE_SECRETS:
         AZURE_SEARCH_SERVICE = secrets.get("AZURE_SEARCH_SERVICE")  
         AZURE_SEARCH_KEY = secrets.get("AZURE_SEARCH_KEY")
         AZURE_SEARCH_INDEX = secrets.get("AZURE_SEARCH_INDEX")
+        OPENAI_API_VERSION  = secrets.get("OPENAI_API_VERSION")
     except json.JSONDecodeError:
         st.error("❌ Failed to decode AZURE_SECRETS. Ensure it's a valid JSON.")
         st.stop()
@@ -129,6 +130,7 @@ def generate_response(query, file_text=None):
         model_name=OPENAI_DEPLOYMENT_NAME,
         api_key=OPENAI_API_KEY,
         azure_endpoint=AZURE_OPENAI_ENDPOINT
+        api_version=OPENAI_API_VERSION
     )
     
     answer = chat.predict(prompt)
