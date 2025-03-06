@@ -42,6 +42,9 @@ except Exception as e:
     # Handle connection error but allow the app to continue running
     st.error(f"❌ Failed to connect to Azure AI Search: {e}")
 
+# Simple cache to store previously answered queries
+query_cache = {}
+
 # ✅ Search function
 def search_documents(query, top_k=50):
     """Search Azure AI Search index for relevant documents and retrieve references."""
