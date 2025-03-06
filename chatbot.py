@@ -11,40 +11,36 @@ from azure.search.documents.indexes.models import SearchIndex, SimpleField, Sear
 from azure.core.credentials import AzureKeyCredential
 from dotenv import load_dotenv
 
+# Load environment variables
 load_dotenv(dotenv_path="keys.env", override=True)
-
-search_client = None
-
 
 # Fetch environment variables
 OPENAI_DEPLOYMENT_NAME = os.getenv("OPENAI_DEPLOYMENT_NAME")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") 
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
-AZURE_SEARCH_SERVICE = os.getenv("AZURE_SEARCH_SERVICE")  
+AZURE_SEARCH_SERVICE = os.getenv("AZURE_SEARCH_SERVICE")
 AZURE_SEARCH_KEY = os.getenv("AZURE_SEARCH_KEY")
 AZURE_SEARCH_INDEX = os.getenv("AZURE_SEARCH_INDEX")
 
+# Create Azure Search Client, but don't stop the app if it fails
 search_client = None
-
-# Validate required values
-if not OPENAI_API_KEY or not AZURE_OPENAI_ENDPOINT or not AZURE_SEARCH_SERVICE or not AZURE_SEARCH_KEY or not AZURE_SEARCH_INDEX:
-    st.error("❌ Missing API keys or Azure Search details. Check your .env file.")
-    st.stop()
-
 AZURE_SEARCH_ENDPOINT = f"https://{AZURE_SEARCH_SERVICE}.search.windows.net"
 
-try:
-    search_client = SearchClient(
-        endpoint=AZURE_SEARCH_ENDPOINT,  
-        index_name=AZURE_SEARCH_INDEX,
-        credential=AzureKeyCredential(AZURE_SEARCH_KEY)
-    )
-except Exception as e:
-    st.error(f"❌ Failed to connect to Azure AI Search: {e}")
-    st.stop()
+# If environment variables are missing, log a warning but let the app load
+if not OPENAI_API_KEY or not AZURE_OPENAI_ENDPOINT or not AZURE_SEARCH_SERVICE or not AZURE_SEARCH_KEY or not AZURE_SEARCH_INDEX:
+    st.warning("⚠️ Some API keys or Azure Search details are missing. Functionality may be limited.")
 
-# Simple cache to store previously answered queries
-query_cache = {}
+# Attempt to create the Azure Search Client when needed
+try:
+    if AZURE_SEARCH_KEY and AZURE_SEARCH_SERVICE and AZURE_SEARCH_INDEX:
+        search_client = SearchClient(
+            endpoint=AZURE_SEARCH_ENDPOINT,
+            index_name=AZURE_SEARCH_INDEX,
+            credential=AzureKeyCredential(AZURE_SEARCH_KEY)
+        )
+except Exception as e:
+    # Handle connection error but allow the app to continue running
+    st.error(f"❌ Failed to connect to Azure AI Search: {e}")
 
 # ✅ Search function
 def search_documents(query, top_k=50):
