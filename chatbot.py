@@ -5,41 +5,30 @@ import os
 import PyPDF2
 import docx
 import pandas as pd
-import json
 from azure.search.documents import SearchClient
 from azure.search.documents.indexes import SearchIndexClient
 from azure.search.documents.indexes.models import SearchIndex, SimpleField, SearchFieldDataType
 from azure.core.credentials import AzureKeyCredential
+from dotenv import load_dotenv
 
-import os
+load_dotenv(dotenv_path="keys.env", override=True)
 
-# Fetch GitHub secret (expected to be a JSON string)
-AZURE_SECRETS = os.getenv("AZURE_SECRETS")
+search_client = None
 
-if AZURE_SECRETS:
-    try:
-        secrets = json.loads(AZURE_SECRETS)  # Parse the JSON string
-        OPENAI_DEPLOYMENT_NAME = secrets.get("OPENAI_DEPLOYMENT_NAME")
-        OPENAI_API_KEY = secrets.get("OPENAI_API_KEY")
-        AZURE_OPENAI_ENDPOINT = secrets.get("AZURE_OPENAI_ENDPOINT")
-        AZURE_SEARCH_SERVICE = secrets.get("AZURE_SEARCH_SERVICE")  
-        AZURE_SEARCH_KEY = secrets.get("AZURE_SEARCH_KEY")
-        AZURE_SEARCH_INDEX = secrets.get("AZURE_SEARCH_INDEX")
-        OPENAI_API_VERSION  = secrets.get("OPENAI_API_VERSION")
-    except json.JSONDecodeError:
-        print("❌ Failed to decode AZURE_SECRETS. Ensure it's a valid JSON.")
-else:
-    print("❌ Missing AZURE_SECRETS environment variable.")
+
+# Fetch environment variables
+OPENAI_DEPLOYMENT_NAME = os.getenv("OPENAI_DEPLOYMENT_NAME")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") 
+AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
+AZURE_SEARCH_SERVICE = os.getenv("AZURE_SEARCH_SERVICE")  
+AZURE_SEARCH_KEY = os.getenv("AZURE_SEARCH_KEY")
+AZURE_SEARCH_INDEX = os.getenv("AZURE_SEARCH_INDEX")
 
 # Validate required values
 if not OPENAI_API_KEY or not AZURE_OPENAI_ENDPOINT or not AZURE_SEARCH_SERVICE or not AZURE_SEARCH_KEY or not AZURE_SEARCH_INDEX:
-    print("❌ Missing API keys or Azure Search details. Check your GitHub Secrets.")
+    st.error("❌ Missing API keys or Azure Search details. Check your .env file.")
+    st.stop()
 
-# Construct Azure Search Endpoint
-if AZURE_SEARCH_SERVICE:
-    AZURE_SEARCH_ENDPOINT = f"https://{AZURE_SEARCH_SERVICE}.search.windows.net"
-else:
-    print("❌ Missing AZURE_SEARCH_SERVICE, cannot construct endpoint.")
 AZURE_SEARCH_ENDPOINT = f"https://{AZURE_SEARCH_SERVICE}.search.windows.net"
 
 try:
@@ -52,6 +41,8 @@ except Exception as e:
     st.error(f"❌ Failed to connect to Azure AI Search: {e}")
     st.stop()
 
+# Simple cache to store previously answered queries
+query_cache = {}
 
 # ✅ Search function
 def search_documents(query, top_k=50):
@@ -115,8 +106,13 @@ def process_uploaded_file(file):
         return None
 
 def generate_response(query, file_text=None):
-    
     """Generate an AI response in a structured format using either uploaded file content or Azure AI Search, with references."""
+    
+    # Check if the query has been cached
+    if query in query_cache:
+        print("Fetching from cache...")
+        return query_cache[query]
+
     references = []
 
     if file_text:
@@ -133,10 +129,13 @@ def generate_response(query, file_text=None):
         model_name=OPENAI_DEPLOYMENT_NAME,
         api_key=OPENAI_API_KEY,
         azure_endpoint=AZURE_OPENAI_ENDPOINT,
-        api_version=OPENAI_API_VERSION,
     )
     
     answer = chat.invoke(prompt)
+
+    # Cache the result
+    query_cache[query] = (answer, references)
+    
     return answer, references
 
 # Streamlit UI
